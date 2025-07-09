@@ -9,8 +9,8 @@ app.get("/", (req, res) => {
   res.json({ message: "API Rest Medicine with Node.js" });
 });
 
+app.use(express.json());
 app.use("/api/", medicinesRouter);
-
 app.use(error_404);
 
 const PORT = process.env.PORT || 3001;
