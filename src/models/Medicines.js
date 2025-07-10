@@ -3,12 +3,11 @@ import {
   collection,
   getDocs,
   doc,
-  getDoc,
+  getDoc, 
   serverTimestamp,
   addDoc,
 } from "firebase/firestore";
 import calculateEstimatedStock from "../services/calculate-estimated-stock.js";
-
 
 const medicinesCollection = collection(db, "medicines");
 export const getAllMedicines = async () => {
@@ -19,7 +18,16 @@ export const getAllMedicines = async () => {
     console.error(error);
   }
 };
-
+export const getMedicineById = async (id) => {
+  try {
+    const medicineRef = doc(medicinesCollection, id);
+    const snapshot = await getDoc(medicineRef);
+    return snapshot.exists() ? { id: snapshot.id, ...snapshot.data() } : null;
+  } catch (error) {
+    console.error (error);
+    
+  }
+};
 
 export const addMedicine = async (req, res) => {
   try {
@@ -44,19 +52,15 @@ export const addMedicine = async (req, res) => {
       created: serverTimestamp(),
     };
 
-    
     const estimated_stock = calculateEstimatedStock(parsedMedicine);
 
-    
     const daysUntilLimit = Math.floor(
       (estimated_stock - parsedMedicine.limit_stock) / parsedMedicine.daily_dose
     );
 
-    
     const repurchaseDate = new Date();
     repurchaseDate.setDate(repurchaseDate.getDate() + daysUntilLimit);
 
-    
     const finalMedicine = {
       ...parsedMedicine,
       estimated_stock,
