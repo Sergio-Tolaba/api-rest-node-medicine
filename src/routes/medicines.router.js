@@ -1,13 +1,14 @@
 import {Router} from 'express'
+import { getAllMedicines,
+
+     } from '../controllers/medicines.controller.js';
+import { addMedicine } from '../models/Medicines.js';
+
 
 const router = Router()
-
-import { getAllMedicines
-     //getAllCategories,
-     //searchMedicines,
-     //getMedicineById
-     } from '../controllers/medicines.controller.js';
 router.get("/medicines", getAllMedicines); 
+
+router.post("/medicines", addMedicine);
 
 
 export default router 
