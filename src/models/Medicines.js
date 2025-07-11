@@ -6,9 +6,10 @@ import {
   getDoc,
   addDoc,
   serverTimestamp,
+  query,
+  where,
+  setDoc
 } from "firebase/firestore";
-
-
 const medicinesCollection = collection(db, "medicines");
 export const getAllMedicines = async () => {
   try {
@@ -27,12 +28,25 @@ export const getMedicineById = async (id) => {
     console.error(error);
   }
 };
+export const findMedicineByName = async (name) => {
+  const q = query(medicinesCollection, where("name", "==", name));
+  const snapshot = await getDocs(q);
+  if (snapshot.empty) return null;
 
-export const saveMedicine = async (medicine) => {
-  try {
-    const docRef = await addDoc(medicinesCollection, medicine);
-    return docRef.id;
-  } catch (error) {
-    console.error(error);
-  }
+  const docData = snapshot.docs[0];
+  return {
+    id: docData.id,
+    ...docData.data(),
+  };
+};
+
+export const updateMedicineById = async (id, data) => {
+  const docRef = doc(medicinesCollection, id);
+  await setDoc(docRef, data, { merge: true });
+};
+
+export const saveMedicine = async (data) => {
+  const docRef = doc(medicinesCollection);
+  await setDoc(docRef, data);
+  return docRef.id;
 };

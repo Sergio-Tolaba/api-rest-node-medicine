@@ -28,18 +28,47 @@ export const getMedicineById = async (req, res) => {
 
 export const addMedicine = async (req, res) => {
   try {
-    const medicineData = prepareMedicineData(req.body);
-    const id = await Model.saveMedicine(medicineData);
+    const incoming = req.body;
+    const existing = await Model.findMedicineByName(incoming.name);
 
-    res.status(201).json({
-      message: "Registered medicine",
-      id,
-      estimated_stock: medicineData.estimated_stock,
-      repurchase_date: medicineData.repurchase_date,
-      created_display: medicineData.created_display,
-    });
+    if (existing) {
+      // Sumar stock
+      const totalStock = parseFloat(existing.current_stock) + parseFloat(incoming.current_stock || 0);
+
+      // Usamos la nueva fecha de compra y el nuevo stock
+      const mergedData = {
+        ...existing,
+        ...incoming,
+        current_stock: totalStock,
+        purchase_date: incoming.purchase_date
+      };
+
+      const updatedData = prepareMedicineData(mergedData);
+
+      await Model.updateMedicineById(existing.id, updatedData);
+
+      return res.status(200).json({
+        message: "Medicine updated (stock merged)",
+        id: existing.id,
+        estimated_stock: updatedData.estimated_stock,
+        repurchase_date: updatedData.repurchase_date,
+        created_display: updatedData.created_display,
+      });
+    } else {
+      // Nueva medicina
+      const newData = prepareMedicineData(incoming);
+      const id = await Model.saveMedicine(newData);
+
+      return res.status(201).json({
+        message: "Registered new medicine",
+        id,
+        estimated_stock: newData.estimated_stock,
+        repurchase_date: newData.repurchase_date,
+        created_display: newData.created_display,
+      });
+    }
   } catch (error) {
-    console.error(error);
-    
+    console.error("Error in addMedicine:", error);
+    res.status(500).json({ error: "Failed to add or update medicine" });
   }
 };
