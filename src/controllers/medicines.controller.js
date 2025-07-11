@@ -1,9 +1,10 @@
 import * as Model from "../models/Medicines.js";
-import {calculateEstimatedStock,prepareMedicineData} from "../services/calculate-prepare.js";
+import prepareMedicineData from "../services/prepare-medicine-data.js";
 
 
 export const getAllMedicines = async (req, res) => {
-  const { category } = req.query;
+try {
+    const { category } = req.query;
   const medicines = await Model.getAllMedicines();
   if (category) {
     const medicineFiltered = medicines.filter((item) =>
@@ -12,18 +13,30 @@ export const getAllMedicines = async (req, res) => {
     return res.json(medicineFiltered);
   }
   res.json(medicines);
+} catch (error) {
+  console.error("Error in getAllMedicines:", error)
+  res.status(500).json({error: "Failed to fetch medicines"})
+  
+}
 };
 
-//search
+
 
 export const getMedicineById = async (req, res) => {
-  const id = req.params.id
+  try {
+      const id = req.params.id
   const medicine = await Model.getMedicineById(id);
   
   if (!medicine) {
     res.status(404).json({ error: "The medicine does not exist" });
   }
   res.json(medicine);
+  } catch (error) {
+    console.error("Error n getMedicineById:", error)
+    res.status(500).json({error: "Failed to fetch medicine" })
+    
+  }
+
 };
 
 export const addMedicine = async (req, res) => {
@@ -74,7 +87,8 @@ export const addMedicine = async (req, res) => {
 };
 
 export const deleteMedicine = async (req,res)=>{
-  const medicineId = req.params.id
+  try {
+    const medicineId = req.params.id
   const medicine = await Model.deleteMedicine(medicineId)
   if(!medicine){
     return res.status(404).json({error:"Medicine not find"})
@@ -83,4 +97,9 @@ export const deleteMedicine = async (req,res)=>{
                         id: medicine.id,
                         name: medicine.name          
   })
+  } catch (error) {
+    console.error("Error in deleteMedicine:", error)
+    res.status(500).json({error: "Failed to delete medicine"})
+  }
+  
 } 
