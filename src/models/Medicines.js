@@ -8,7 +8,8 @@ import {
   serverTimestamp,
   query,
   where,
-  setDoc
+  setDoc,
+  deleteDoc
 } from "firebase/firestore";
 const medicinesCollection = collection(db, "medicines");
 export const getAllMedicines = async () => {
@@ -50,3 +51,19 @@ export const saveMedicine = async (data) => {
   await setDoc(docRef, data);
   return docRef.id;
 };
+
+
+export const deleteMedicine = async(id)=>{
+  try {
+    const medicineRef = doc(medicinesCollection, id)
+    const snapshot = await getDoc(medicineRef)
+    if (!snapshot.exists()){
+      return false
+    }
+    const medicineData = snapshot.data()
+    await deleteDoc(medicineRef)
+    return {id, name:medicineData.name || "Name not available"}
+  } catch (error) {
+    console.error(error)
+  }
+}

@@ -72,3 +72,15 @@ export const addMedicine = async (req, res) => {
     res.status(500).json({ error: "Failed to add or update medicine" });
   }
 };
+
+export const deleteMedicine = async (req,res)=>{
+  const medicineId = req.params.id
+  const medicine = await Model.deleteMedicine(medicineId)
+  if(!medicine){
+    return res.status(404).json({error:"Medicine not find"})
+  }
+  res.status(200).json({message: `Medicine deleted successfully`,
+                        id: medicine.id,
+                        name: medicine.name          
+  })
+} 
